@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global Styles */
+body {
+  @apply m-0 font-sans antialiased;
+}
+
+code {
+  font-family: "source-code-pro", Menlo, Monaco, Consolas, "Courier New", monospace;
+}
