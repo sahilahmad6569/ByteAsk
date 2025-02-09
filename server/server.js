@@ -37,6 +37,8 @@ app.use(passport.session());
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/questions", require("./routes/question"));
+app.use("/api/answers", require("./routes/answer"));
 
 app.get("/", (req, res) => {
   res.send("ByteAsk Backend is running");
