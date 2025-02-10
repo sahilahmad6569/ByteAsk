@@ -25,7 +25,7 @@ const Dashboard = () => {
 
   const fetchLatestQuestions = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/questions/latest");
+      const response = await fetch("http://byteask.onrender.com/api/questions/latest");
       const data = await response.json();
       setQuestions(data);
       setFilteredQuestions(data);
@@ -59,7 +59,7 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:5000/api/questions/create", {
+      const response = await fetch("http://byteask.onrender.com/api/questions/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -23,7 +23,7 @@ const Login = () => {
       return;
     }
 
-    const url = isLogin ? "http://localhost:5000/api/auth/login" : "http://localhost:5000/api/auth/register";
+    const url = isLogin ? "http://byteask.onrender.com/api/auth/login" : "http://byteask.onrender.com/api/auth/register";
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {
@@ -49,7 +49,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google";
+    window.location.href = "http://byteask.onrender.com/api/auth/google";
   };
 
   return (
