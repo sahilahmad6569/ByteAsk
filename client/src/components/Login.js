@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Import react-icons/fi
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -31,6 +32,7 @@ const Login = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem("authToken", data.token);
@@ -71,6 +73,7 @@ const Login = () => {
               placeholder="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              autoComplete="off"
               required
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 placeholder-gray-500"
             />
@@ -80,6 +83,7 @@ const Login = () => {
             placeholder="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="off"
             required
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 placeholder-gray-500"
           />
@@ -89,6 +93,7 @@ const Login = () => {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="off"
               required
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 placeholder-gray-500"
             />
@@ -96,8 +101,9 @@ const Login = () => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? "🙈" : "👁️"}
+              {showPassword ? <FiEyeOff className="w-6 h-6" /> : <FiEye className="w-6 h-6" />}
             </button>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -117,23 +123,39 @@ const Login = () => {
           </button>
         </div>
 
-        <div className="mt-5 text-center">
-          <p className="text-sm text-gray-600 font-medium">
-            {isLogin ? "New to ByteAsk?" : "Already have an account?"}
-            <button onClick={() => setIsLogin(!isLogin)} className="text-cyan-600 font-semibold hover:underline ml-1">
-              {isLogin ? "Create an account" : "Login here"}
-            </button>
-          </p>
-        </div>
+        {/* Toggle Button for Login/Signup */}
+        <p className="mt-4 text-gray-600">
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
+          <button onClick={() => setIsLogin(!isLogin)} className="text-cyan-500 hover:underline font-medium">
+            {isLogin ? "Sign Up" : "Login"}
+          </button>
+        </p>
       </div>
 
-      {/* Left Section (Desktop) */}
+      {/* Left Section (Desktop) with Statistics */}
       <div className="hidden md:flex w-1/2 flex-col justify-center items-center bg-cyan-500 text-white p-8 text-center">
         <img src="/images/ByteAsk_Logo.png" alt="ByteAsk Logo" className="w-60 mb-4 drop-shadow-lg" />
         <h2 className="text-5xl font-extrabold mb-3">Welcome to ByteAsk</h2>
         <p className="text-lg max-w-lg leading-relaxed font-medium">
           Elevate your learning and knowledge sharing with ByteAsk – the go-to platform for meaningful tech discussions and networking.
         </p>
+
+        {/* Statistics Cards */}
+        <div className="mt-6 flex flex-wrap justify-center gap-6">
+          {[
+            { value: "50K+", label: "Total Users" },
+            { value: "1.2K", label: "Active Discussions" },
+            { value: "120+", label: "Experts Online" },
+          ].map((stat, index) => (
+            <div
+              key={index}
+              className="bg-white/20 backdrop-blur-md border border-white/10 p-5 rounded-lg shadow-lg w-44 text-center hover:scale-105 transition-all hover:bg-white/30 hover:border-white/20"
+            >
+              <h3 className="text-3xl font-bold">{stat.value}</h3>
+              <p className="text-sm font-medium">{stat.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

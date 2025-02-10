@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiLogOut, FiMenu, FiHome, FiUsers, FiSettings, FiX, FiPlus } from "react-icons/fi";
+import { FiLogOut, FiMenu, FiHome, FiUsers, FiSettings, FiX, FiPlus, FiSearch } from "react-icons/fi";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [questions, setQuestions] = useState([]);
-  const [showForm, setShowForm] = useState(false); // Toggle question form
+  const [filteredQuestions, setFilteredQuestions] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -25,13 +28,28 @@ const Dashboard = () => {
       const response = await fetch("http://localhost:5000/api/questions/latest");
       const data = await response.json();
       setQuestions(data);
+      setFilteredQuestions(data);
     } catch (error) {
       console.error("Error fetching questions:", error);
     }
   };
 
-  // ✅ Handle Logout (Fixed Issue)
+  // ✅ Search Bar Functionality
+  const handleSearch = (event) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+    const filtered = questions.filter(
+      (q) => q.title.toLowerCase().includes(query) || q.description.toLowerCase().includes(query)
+    );
+    setFilteredQuestions(filtered);
+  };
+
+  // ✅ Handle Logout Confirmation Dialog
   const handleLogout = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem("authToken");
     navigate("/login");
   };
@@ -52,8 +70,9 @@ const Dashboard = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setQuestions([data, ...questions]); // Add new question instantly
-        setShowForm(false); // Hide form after submission
+        setQuestions([data, ...questions]);
+        setFilteredQuestions([data, ...questions]);
+        setShowForm(false);
         setTitle("");
         setDescription("");
         setTags("");
@@ -103,15 +122,35 @@ const Dashboard = () => {
 
       {/* Main Content (Scrollable) */}
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        {/* Top Navbar */}
-        <div className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
-          <button onClick={() => setSidebarOpen(true)} className="md:hidden">
+        {/* Top Navbar with Search Bar */}
+        {/* Top Navbar with Search Bar & Button */}
+        <div className="bg-white shadow-md p-4 flex flex-col md:flex-row md:justify-between items-center gap-4 sticky top-0 z-10">
+
+          {/* Mobile Menu Button */}
+          <button onClick={() => setSidebarOpen(true)} className="md:hidden self-start">
             <FiMenu size={24} />
           </button>
-          <h2 className="text-lg font-bold text-gray-700">Dashboard</h2>
-          <button onClick={() => setShowForm(!showForm)} className="flex items-center space-x-2 bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition-all">
+
+          {/* Search Bar */}
+          <div className="relative w-full md:max-w-lg">
+            <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-cyan-500" size={20} />
+            <input
+              type="text"
+              placeholder="Search questions..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="w-full pl-12 pr-4 py-2 border-2 border-cyan-500 text-cyan-700 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-600 transition-all duration-200"
+            />
+          </div>
+
+          {/* Create Question Button */}
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="w-full md:w-auto flex items-center justify-center space-x-2 bg-cyan-500 text-white px-4 py-2 rounded-md hover:bg-cyan-600 transition-all"
+          >
             <FiPlus size={20} /> <span>Create Question</span>
           </button>
+
         </div>
 
         {/* Create Question Form */}
@@ -127,6 +166,20 @@ const Dashboard = () => {
           </div>
         )}
 
+        {/* Custom Logout Confirmation Dialog */}
+        {showLogoutDialog && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-lg font-bold mb-4">Confirm Logout</h2>
+              <p className="text-gray-700 mb-4">Are you sure you want to logout?</p>
+              <div className="flex justify-end space-x-4">
+                <button onClick={() => setShowLogoutDialog(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+                <button onClick={confirmLogout} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Logout</button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content Section */}
         <div className="p-6 w-full">
           {activeSection === "home" && (
@@ -137,16 +190,16 @@ const Dashboard = () => {
               {/* Latest Questions Section */}
               <h2 className="text-2xl font-extrabold text-gray-800 mb-4">Latest Questions</h2>
               <div className="space-y-4">
-                {questions.length > 0 ? (
-                  questions.map((q) => (
+                {filteredQuestions.length > 0 ? (
+                  filteredQuestions.map((q) => (
                     <div key={q._id} className="bg-white shadow-md p-5 rounded-lg hover:shadow-lg transition-all">
                       <h3 className="text-lg font-semibold text-cyan-700">{q.title}</h3>
                       <p className="text-gray-600 mt-2">{q.description}</p>
-                      <p className="text-gray-500 text-sm mt-3">📝 Posted by: {q.author}</p>
+                      <p className="text-gray-500 text-sm mt-3">📝 Posted by: {q.authorName || "Anonymous"}</p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500 text-lg">No questions yet.</p>
+                  <p className="text-gray-500 text-lg">No matching questions.</p>
                 )}
               </div>
             </div>
