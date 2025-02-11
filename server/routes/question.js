@@ -1,5 +1,6 @@
 const express = require("express");
 const Question = require("../models/Question"); // Import Question Model
+const User = require("../models/User"); // Import User Model
 const { body, validationResult } = require("express-validator");
 const authMiddleware = require("../middleware/authMiddleware"); // Middleware for authentication
 const router = express.Router();
@@ -7,7 +8,14 @@ const router = express.Router();
 // ✅ Get Latest Questions (Sorted by Most Recent)
 router.get("/latest", async (req, res) => {
   try {
-    const questions = await Question.find().sort({ createdAt: -1 }).limit(10);
+    const questions = await Question.find().sort({ createdAt: -1 }).limit(10).lean();
+
+    // Fetch author names
+    for (let question of questions) {
+      const user = await User.findById(question.author).select("name");
+      question.authorName = user ? user.name : "Unknown";
+    }
+
     res.json(questions);
   } catch (err) {
     console.error("Error fetching questions:", err);
@@ -22,8 +30,14 @@ router.get("/all", async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const questions = await Question.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const questions = await Question.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean();
     const totalQuestions = await Question.countDocuments();
+
+    // Fetch author names
+    for (let question of questions) {
+      const user = await User.findById(question.author).select("name");
+      question.authorName = user ? user.name : "Unknown";
+    }
 
     res.json({ questions, totalPages: Math.ceil(totalQuestions / limit), currentPage: page });
   } catch (err) {
@@ -48,11 +62,14 @@ router.post(
 
     try {
       const { title, description, tags } = req.body;
+      const user = await User.findById(req.user.id).select("name");
+
       const newQuestion = new Question({
         title,
         description,
         tags,
         author: req.user.id, // Logged-in User ID from Middleware
+        authorName: user ? user.name : "Unknown", // Add authorName
         createdAt: new Date(),
       });
 
