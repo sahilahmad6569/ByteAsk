@@ -18,7 +18,7 @@ app.use(express.json());
 
 const allowedOrigins = [
   "http://localhost:3000",  // Development (Localhost)
-  "https://your-netlify-app.netlify.app", // Production (Netlify frontend)
+  "https://byteask.netlify.app", // Production (Netlify frontend)
 ];
 
 app.use(
