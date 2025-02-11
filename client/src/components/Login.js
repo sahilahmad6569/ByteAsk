@@ -23,7 +23,7 @@ const Login = () => {
       return;
     }
 
-    const url = isLogin ? "http://byteask.onrender.com/api/auth/login" : "http://byteask.onrender.com/api/auth/register";
+    const url = isLogin ? `${process.env.REACT_APP_BACKEND_URL}/api/auth/login` : `${process.env.REACT_APP_BACKEND_URL}/api/auth/register`;
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {
@@ -49,7 +49,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://byteask.onrender.com/api/auth/google";
+    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/api/auth/google`;
   };
 
   return (
