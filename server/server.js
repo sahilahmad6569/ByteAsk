@@ -14,8 +14,19 @@ const port = process.env.PORT || 5000;
 connectDB();
 
 // Middleware
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
+
+const allowedOrigins = [
+  "http://localhost:3000",  // Development (Localhost)
+  "https://your-netlify-app.netlify.app", // Production (Netlify frontend)
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  })
+);
 
 // Configure Sessions for Passport
 app.use(

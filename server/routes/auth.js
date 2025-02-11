@@ -15,7 +15,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL, // ✅ Dynamic Callback URL
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
@@ -115,7 +115,7 @@ router.post(
 // Google Login Route
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-// Google OAuth Callback Route
+// Google OAuth Callback Route (Handles Redirect)
 router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/" }),
@@ -125,8 +125,9 @@ router.get(
       const payload = { user: { id: user.id } };
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-      // Redirect to frontend with JWT token
-      res.redirect(`http://localhost:3000/dashboard?token=${token}`);
+      // ✅ Use Environment Variable for Redirect URL
+      const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+      res.redirect(`${CLIENT_URL}/dashboard?token=${token}`);
     } catch (error) {
       console.error(error);
       res.status(500).send("Authentication Failed");
@@ -137,7 +138,8 @@ router.get(
 // Logout Route
 router.get("/logout", (req, res) => {
   req.logout(() => {
-    res.redirect("http://localhost:3000");
+    const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+    res.redirect(CLIENT_URL);
   });
 });
 
