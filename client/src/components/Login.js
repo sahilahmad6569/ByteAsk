@@ -56,7 +56,7 @@ const Login = () => {
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
       {/* Left Section (Mobile) */}
       <div className="w-full md:hidden flex flex-col justify-center items-center bg-cyan-500 text-white p-8 text-center">
-        <img src="/images/ByteAsk_Logo.png" alt="ByteAsk Logo" className="w-40 mb-4 drop-shadow-lg" />
+        <img src="/images/ByteAsk_Logo.png" alt="ByteAsk Logo" className="w-52 mb-6 drop-shadow-lg" />
         <h2 className="text-4xl font-extrabold mb-3">Welcome to ByteAsk</h2>
         <p className="text-lg leading-relaxed max-w-sm font-medium">
           Your ultimate hub for expert tech discussions, collaboration, and knowledge sharing.
@@ -134,7 +134,7 @@ const Login = () => {
 
       {/* Left Section (Desktop) with Statistics */}
       <div className="hidden md:flex w-1/2 flex-col justify-center items-center bg-cyan-500 text-white p-8 text-center">
-        <img src="/images/ByteAsk_Logo.png" alt="ByteAsk Logo" className="w-60 mb-4 drop-shadow-lg" />
+        <img src="/images/ByteAsk_Logo.png" alt="ByteAsk Logo" className="w-72 mb-6 drop-shadow-lg" />
         <h2 className="text-5xl font-extrabold mb-3">Welcome to ByteAsk</h2>
         <p className="text-lg max-w-lg leading-relaxed font-medium">
           Elevate your learning and knowledge sharing with ByteAsk – the go-to platform for meaningful tech discussions and networking.
