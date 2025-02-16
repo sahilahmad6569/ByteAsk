@@ -23,10 +23,13 @@ const Login = () => {
       return;
     }
 
-    const url = isLogin ? `${process.env.REACT_APP_BACKEND_URL}/api/auth/login` : `${process.env.REACT_APP_BACKEND_URL}/api/auth/register`;
+    const url = isLogin
+      ? `${process.env.REACT_APP_BACKEND_URL}/api/auth/login`
+      : `${process.env.REACT_APP_BACKEND_URL}/api/auth/register`;
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {
+      // Step 1: Send login/register request to the backend
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,9 +37,30 @@ const Login = () => {
       });
 
       const data = await response.json();
+
       if (response.ok) {
+        // Step 2: Store the authToken in localStorage
         localStorage.setItem("authToken", data.token);
-        navigate("/dashboard");
+
+        // Step 3: Fetch user profile data using the authToken
+        const userResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/user`, {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+          },
+        });
+
+        const userData = await userResponse.json();
+
+        if (userResponse.ok) {
+          // Step 4: Store the user profile data in localStorage
+          localStorage.setItem("userProfile", JSON.stringify(userData));
+          console.log("User profile stored in localStorage:", userData);
+
+          // Step 5: Redirect the user to the dashboard
+          navigate("/dashboard");
+        } else {
+          setError("Failed to fetch user profile. Please try again.");
+        }
       } else {
         setError(data.msg || "Authentication failed. Please try again.");
       }
@@ -107,7 +131,11 @@ const Login = () => {
             </button>
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button type="submit" disabled={isLoading} className="w-full p-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-all text-lg font-semibold">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full p-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-all text-lg font-semibold"
+          >
             {isLoading ? "Loading..." : isLogin ? "Login" : "Sign Up"}
           </button>
         </form>

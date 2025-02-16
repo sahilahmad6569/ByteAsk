@@ -112,6 +112,28 @@ router.post(
   }
 );
 
+// Fetch User Profile Data
+router.get("/user", async (req, res) => {
+  try {
+    // Extract token from Authorization header
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ msg: "No token, authorization denied" });
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded.user?.id) return res.status(401).json({ msg: "Invalid token" });
+
+    // Fetch user data
+    const user = await User.findById(decoded.user.id).select("-password");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
 // Google Login Route
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
