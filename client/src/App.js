@@ -11,13 +11,19 @@ const AppContent = () => {
   useEffect(() => {
     // Extract token from URL query parameters
     const queryParams = new URLSearchParams(location.search);
-    const token = queryParams.get("token");
+    const urlToken = queryParams.get("token");
 
-    if (token) {
+    if (urlToken) {
       // Save token to localStorage
-      localStorage.setItem("authToken", token);
+      localStorage.setItem("authToken", urlToken);
       // Redirect to dashboard
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
+    } else {
+      // If no token in URL, check if a token already exists in localStorage
+      const storedToken = localStorage.getItem("authToken");
+      if (storedToken && (location.pathname === "/" || location.pathname === "/login")) {
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [location, navigate]);
 
