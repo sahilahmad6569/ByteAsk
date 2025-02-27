@@ -60,6 +60,20 @@ const Dashboard = () => {
     }
   };
 
+  // Add this useEffect hook near your other useEffect hooks
+  useEffect(() => {
+    const handlePopState = () => {
+      if (activeSection !== 'home') {
+        // Set to home section and update history to prevent navigation
+        setActiveSection('home');
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [activeSection]); // Dependency ensures current section state is fresh
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       // Check if we're on mobile and sidebar is open
