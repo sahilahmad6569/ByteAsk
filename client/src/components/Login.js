@@ -146,7 +146,7 @@ const Login = () => {
             onClick={handleGoogleLogin}
             className="flex items-center justify-center w-full p-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition-all font-medium text-gray-700"
           >
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" className="w-6 h-6 mr-3" />
+            <img src="/images/google-icon.png" alt="Google Logo" className="w-8 h-8 mr-3" />
             {isLogin ? "Continue with Google" : "Sign up with Google"}
           </button>
         </div>
