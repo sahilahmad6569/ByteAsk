@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LoginForm from "./LoginForm";
-import SignUpForm from "./SignUpForm";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Import react-icons/fi
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);  // Toggle between Login and Signup
+  const [isLogin, setIsLogin] = useState(true); // Toggle between Login and Signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -30,6 +29,7 @@ const Login = () => {
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {
+      // Step 1: Send login/register request to the backend
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,8 +39,10 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
+        // Step 2: Store the authToken in localStorage
         localStorage.setItem("authToken", data.token);
 
+        // Step 3: Fetch user profile data using the authToken
         const userResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/auth/user`, {
           headers: {
             Authorization: `Bearer ${data.token}`,
@@ -50,8 +52,11 @@ const Login = () => {
         const userData = await userResponse.json();
 
         if (userResponse.ok) {
+          // Step 4: Store the user profile data in localStorage
           localStorage.setItem("userProfile", JSON.stringify(userData));
           console.log("User profile stored in localStorage:", userData);
+
+          // Step 5: Redirect the user to the dashboard
           navigate("/dashboard");
         } else {
           setError("Failed to fetch user profile. Please try again.");
@@ -85,33 +90,55 @@ const Login = () => {
       {/* Right Section (Form) */}
       <div className="w-full md:w-1/2 flex flex-col flex-grow justify-center items-center px-12 py-14 bg-white shadow-lg rounded-xl max-w-md mx-auto md:mt-0 mt-auto">
         <h2 className="text-4xl font-extrabold text-cyan-600 mb-6">{isLogin ? "Login" : "Sign Up"}</h2>
-        {isLogin ? (
-          <LoginForm
-            email={email}
-            password={password}
-            showPassword={showPassword}
-            setEmail={setEmail}
-            setPassword={setPassword}
-            setShowPassword={setShowPassword}
-            handleAuth={handleAuth}
-            error={error}
-            isLoading={isLoading}
+        <form onSubmit={handleAuth} className="space-y-6 w-full">
+          {!isLogin && (
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="off"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 placeholder-gray-500"
+            />
+          )}
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="off"
+            required
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 placeholder-gray-500"
           />
-        ) : (
-          <SignUpForm
-            name={name}
-            email={email}
-            password={password}
-            showPassword={showPassword}
-            setName={setName}
-            setEmail={setEmail}
-            setPassword={setPassword}
-            setShowPassword={setShowPassword}
-            handleAuth={handleAuth}
-            error={error}
-            isLoading={isLoading}
-          />
-        )}
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="off"
+              required
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 placeholder-gray-500"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <FiEyeOff className="w-6 h-6" /> : <FiEye className="w-6 h-6" />}
+            </button>
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full p-3 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-all text-lg font-semibold"
+          >
+            {isLoading ? "Loading..." : isLogin ? "Login" : "Sign Up"}
+          </button>
+        </form>
 
         {/* Google Login Button */}
         <div className="mt-6 w-full space-y-4">
