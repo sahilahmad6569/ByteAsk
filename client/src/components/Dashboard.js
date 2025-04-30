@@ -1,19 +1,21 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  FiLogOut, 
-  FiMenu, 
-  FiHome, 
-  FiSettings, 
-  FiX, 
-  FiSearch, 
-  FiHelpCircle, 
-  FiUser, 
-  FiMessageSquare, 
-  FiTrendingUp, 
-  FiBarChart2, 
-  FiMessageCircle 
+import {
+  FiLogOut,
+  FiMenu,
+  FiHome,
+  FiSettings,
+  FiX,
+  FiSearch,
+  FiHelpCircle,
+  FiUser,
+  FiMessageSquare,
+  FiTrendingUp,
+  FiBarChart2,
+  FiMessageCircle,
+  FiStar // Added for points icon
 } from "react-icons/fi";
+
 import Home from "./Home";
 import AskQuestion from "./AskQuestion";
 import MyQuestions from "./MyQuestions";
@@ -33,8 +35,21 @@ const Dashboard = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [user, setUser] = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showPointsMenu, setShowPointsMenu] = useState(false);
   const sidebarRef = useRef(null);
   const menuButtonRef = useRef(null);
+  const pointsButtonRef = useRef(null);
+
+  const userStats = {
+    points: 2450,
+    badges: ['Gold Contributor', 'Quick Responder', 'Community Star'],
+    votes: {
+      received: 890,
+      given: 345
+    }
+  };
+
+  const profileButtonRef = useRef(null); // Add this line
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -67,15 +82,28 @@ const Dashboard = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (window.innerWidth >= 768) return;
-      if (sidebarOpen && !sidebarRef.current?.contains(event.target) && !menuButtonRef.current?.contains(event.target)) {
-        setSidebarOpen(false);
+      // Handle sidebar closing only for mobile
+      if (window.innerWidth < 768) {
+        if (sidebarOpen &&
+          !sidebarRef.current?.contains(event.target) &&
+          !menuButtonRef.current?.contains(event.target)) {
+          setSidebarOpen(false);
+        }
+      }
+
+      // Always handle dropdown closing regardless of screen size
+      if (showPointsMenu && !pointsButtonRef.current?.contains(event.target)) {
+        setShowPointsMenu(false);
+      }
+
+      if (showProfileMenu && !profileButtonRef.current?.contains(event.target)) {
+        setShowProfileMenu(false);
       }
     };
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [sidebarOpen]);
+  }, [sidebarOpen, showPointsMenu, showProfileMenu]);
 
   const fetchUserProfile = async (token) => {
     try {
@@ -106,8 +134,8 @@ const Dashboard = () => {
   const handleSearch = (event) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
-    const filtered = questions.filter(q => 
-      q.title.toLowerCase().includes(query) || 
+    const filtered = questions.filter(q =>
+      q.title.toLowerCase().includes(query) ||
       q.description.toLowerCase().includes(query)
     );
     setFilteredQuestions(filtered);
@@ -147,9 +175,8 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed inset-y-0 left-0 bg-cyan-600 text-white w-48 p-4 flex flex-col justify-between transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 md:relative md:translate-x-0 shadow-lg z-50 h-screen`}
+        className={`fixed inset-y-0 left-0 bg-cyan-600 text-white w-48 p-4 flex flex-col justify-between transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 md:relative md:translate-x-0 shadow-lg z-50 h-screen`}
       >
         <div>
           <div className="flex justify-between items-center">
@@ -165,72 +192,64 @@ const Dashboard = () => {
           <nav className="mt-6 space-y-3">
             <button
               onClick={() => setActiveSection("home")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "home" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "home" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiHome size={20} /> <span>Home</span>
             </button>
 
             <button
               onClick={() => setActiveSection("ask-question")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "ask-question" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "ask-question" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiHelpCircle size={20} /> <span>Ask Question</span>
             </button>
 
             <button
               onClick={() => setActiveSection("my-questions")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "my-questions" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "my-questions" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiUser size={20} /> <span>My Questions</span>
             </button>
 
             <button
               onClick={() => setActiveSection("answer-questions")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "answer-questions" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "answer-questions" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiMessageSquare size={20} /> <span className="whitespace-nowrap">Write Answers</span>
             </button>
 
             <button
               onClick={() => setActiveSection("trending")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "trending" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "trending" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiTrendingUp size={20} /> <span>Trending</span>
             </button>
 
             <button
               onClick={() => setActiveSection("analytics")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "analytics" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "analytics" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiBarChart2 size={20} /> <span>Analytics</span>
             </button>
 
             <button
               onClick={() => setActiveSection("ask-ai")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "ask-ai" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "ask-ai" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiMessageCircle size={20} /> <span>Ask with AI</span>
             </button>
 
             <button
               onClick={() => setActiveSection("settings")}
-              className={`flex items-center space-x-2 p-3 rounded-md w-full ${
-                activeSection === "settings" ? "bg-cyan-700" : "hover:bg-cyan-700"
-              }`}
+              className={`flex items-center space-x-2 p-3 rounded-md w-full ${activeSection === "settings" ? "bg-cyan-700" : "hover:bg-cyan-700"
+                }`}
             >
               <FiSettings size={20} /> <span>Settings</span>
             </button>
@@ -246,7 +265,7 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        {/* Top Navbar */}
+        {/* Updated Top Navbar */}
         <div className="bg-white shadow-md p-4 flex justify-between items-center sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <button
@@ -269,41 +288,106 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {user && (
-            <div className="relative flex items-center gap-4">
-              <div 
-                className="cursor-pointer" 
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
+          <div className="flex items-center gap-4">
+            {/* Points Dropdown */}
+            <div className="relative" ref={pointsButtonRef}>
+              <button
+                onClick={() => {
+                  setShowPointsMenu(!showPointsMenu);
+                  setShowProfileMenu(false);
+                }}
+                className="flex items-center gap-2 bg-cyan-50 px-4 py-2 rounded-lg hover:bg-cyan-100 transition-colors"
               >
-                {user.picture ? (
-                  <img
-                    src={user.picture}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-cyan-500"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center text-white font-medium text-lg">
-                    {user.name[0]?.toUpperCase()}
-                  </div>
-                )}
-              </div>
+                <FiStar className="text-cyan-600" />
+                <span className="font-medium text-cyan-700">{userStats.points}</span>
+              </button>
 
-              {showProfileMenu && (
-                <div className="absolute right-0 top-12 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+              {showPointsMenu && (
+                <div className="absolute right-0 top-12 mt-2 w-64 bg-white rounded-md shadow-lg py-2 z-50">
                   <div className="px-4 py-2 border-b">
-                    <p className="text-sm font-medium text-gray-700 truncate">{user.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <h3 className="font-medium text-gray-700">Your Achievements</h3>
                   </div>
-                  <button
-                    className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
+
+                  <div className="p-4 space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-600 mb-2">Badges Earned</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {userStats.badges.map((badge, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm"
+                          >
+                            {badge}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-600 mb-2">Votes</h4>
+                      <div className="flex justify-between text-sm">
+                        <div className="text-green-600">
+                          ▲ {userStats.votes.received} Received
+                        </div>
+                        <div className="text-cyan-600">
+                          ▼ {userStats.votes.given} Given
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t">
+                      <button className="w-full text-left px-2 py-1 text-sm text-cyan-600 hover:bg-gray-50">
+                        View Full Statistics →
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
-          )}
+
+            {/* Profile Section (Unchanged) */}
+            {user && (
+              <div
+                className="relative flex items-center gap-4"
+                ref={profileButtonRef} // Add this ref
+              >
+                <div
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setShowProfileMenu(!showProfileMenu);
+                    setShowPointsMenu(false);
+                  }}
+                >
+                  {user.picture ? (
+                    <img
+                      src={user.picture}
+                      alt="Profile"
+                      className="w-10 h-10 rounded-full object-cover border-2 border-cyan-500"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center text-white font-medium text-lg">
+                      {user.name[0]?.toUpperCase()}
+                    </div>
+                  )}
+                </div>
+
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-12 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+                    <div className="px-4 py-2 border-b">
+                      <p className="text-sm font-medium text-gray-700 truncate">{user.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    </div>
+                    <button
+                      className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Main Content Section */}
@@ -338,14 +422,14 @@ const Dashboard = () => {
             <div className="bg-white p-6 rounded-lg">
               <h2 className="text-lg font-bold mb-4">Confirm Logout</h2>
               <div className="flex justify-end gap-4">
-                <button 
-                  onClick={() => setShowLogoutDialog(false)} 
+                <button
+                  onClick={() => setShowLogoutDialog(false)}
                   className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                 >
                   Cancel
                 </button>
-                <button 
-                  onClick={confirmLogout} 
+                <button
+                  onClick={confirmLogout}
                   className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                 >
                   Logout
